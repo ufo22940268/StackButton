@@ -1,6 +1,8 @@
 package com.bettycc.stackbutton.library;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -12,6 +14,10 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
+
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,34 +104,34 @@ public class StackButton extends FrameLayout implements View.OnClickListener {
     }
 
     private void hideItemAnim(final View view, int i) {
-        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, -mViewSize * (i + 1), 0);
-        translateAnimation.setFillAfter(true);
-        translateAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+        ObjectAnimator translateY = ObjectAnimator.ofFloat(view, "translationY",  -mViewSize * (i + 1), 0);
+        translateY.setInterpolator(new OvershootInterpolator());
+        translateY.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
 
-        AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
-        alphaAnimation.setFillAfter(true);
-        alphaAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(view, "alpha", 1, 0);
+        alpha.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
 
-        AnimationSet animationSet = new AnimationSet(false);
-        animationSet.setFillAfter(true);
-        animationSet.addAnimation(translateAnimation);
-        animationSet.addAnimation(alphaAnimation);
-
-        view.startAnimation(animationSet);
-
-        animationSet.setAnimationListener(new Animation.AnimationListener() {
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.play(translateY).with(alpha);
+        animatorSet.start();
+        animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
+            public void onAnimationStart(Animator animation) {
 
             }
 
             @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd(Animator animation) {
                 view.setVisibility(View.GONE);
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
 
             }
         });
@@ -146,37 +152,69 @@ public class StackButton extends FrameLayout implements View.OnClickListener {
     private void showItemAnim(final View view, int i) {
         view.setVisibility(VISIBLE);
 
-        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, 0, -mViewSize * (i + 1));
-        translateAnimation.setFillAfter(true);
-        translateAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-        translateAnimation.setInterpolator(new OvershootInterpolator());
+        ObjectAnimator translateY = ObjectAnimator.ofFloat(view, "translationY", 0,  -mViewSize * (i + 1) );
+        translateY.setInterpolator(new OvershootInterpolator());
+        translateY.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
 
-        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
-        alphaAnimation.setFillAfter(true);
-        alphaAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(view, "alpha", 0, 1);
+        alpha.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
 
-        AnimationSet animationSet = new AnimationSet(false);
-        animationSet.setFillAfter(true);
-        animationSet.addAnimation(translateAnimation);
-        animationSet.addAnimation(alphaAnimation);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.play(translateY).with(alpha);
+        animatorSet.start();
 
-        animationSet.setAnimationListener(new Animation.AnimationListener() {
+        animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
+            public void onAnimationStart(Animator animation) {
 
             }
 
             @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd(Animator animation) {
                 setItemsListener();
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
 
             }
         });
-        view.startAnimation(animationSet);
+
+//        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
+//        alphaAnimation.setFillAfter(true);
+//        alphaAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+//
+//        AnimationSet animationSet = new AnimationSet(false);
+//        animationSet.setFillAfter(true);
+//        animationSet.addAnimation(alphaAnimation);
+//
+//        ObjectAnimator translateY = ObjectAnimator.ofFloat(view, "translationY", 0, -mViewSize * (i + 1));
+//        translateY.setInterpolator(new OvershootInterpolator());
+//        translateY.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+
+//        animationSet.setAnimationListener(new Animation.AnimationListener() {
+//            @Override
+//            public void onAnimationStart(Animation animation) {
+//
+//            }
+//
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//                setItemsListener();
+//            }
+//
+//            @Override
+//            public void onAnimationRepeat(Animation animation) {
+//
+//            }
+//        });
+//        view.startAnimation(animationSet);
+//        translateY.start();
     }
 
     private void setItemsListener() {
