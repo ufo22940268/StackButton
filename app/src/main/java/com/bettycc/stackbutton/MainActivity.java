@@ -19,13 +19,13 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mStackButtonLayer = new StackButton(this, R.layout.stack_button);
+        mStackButtonLayer.show();
+        setStackButtonClickListener(mStackButtonLayer);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mStackButtonLayer.show();
-        setStackButtonClickListener(mStackButtonLayer);
     }
 
     @Override

@@ -43,6 +43,11 @@ public class StackButton {
     }
 
     public void setItemClickListener(View.OnClickListener itemClickListener) {
-        mContainer.setItemClickListener(itemClickListener);
+        for (int i = 0; i < mContainer.getChildCount(); i++) {
+            View v = mContainer.getChildAt(i);
+            if (v.getId() != R.id.stack && v.getId() != -1) {
+                v.setOnClickListener(itemClickListener);
+            }
+        }
     }
 }

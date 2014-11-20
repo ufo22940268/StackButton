@@ -23,6 +23,7 @@ public class StackButtonWidget extends FrameLayout implements View.OnClickListen
     private List<View> mItemViews = new ArrayList<View>();
     private float mViewSize;
     private OnClickListener mItemClickListener;
+    private boolean mAnimate;
 
     public StackButtonWidget(Context context) {
         super(context);
@@ -65,7 +66,7 @@ public class StackButtonWidget extends FrameLayout implements View.OnClickListen
     @Override
     public void onClick(View view) {
         int i = view.getId();
-        if (i == R.id.stack) {
+        if (i == R.id.stack && !mAnimate) {
             toggle();
         }
     }
@@ -110,11 +111,12 @@ public class StackButtonWidget extends FrameLayout implements View.OnClickListen
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-
+                mAnimate = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                mAnimate = false;
                 view.setVisibility(View.GONE);
             }
 
@@ -159,12 +161,12 @@ public class StackButtonWidget extends FrameLayout implements View.OnClickListen
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-
+                mAnimate = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                setItemsListener();
+                mAnimate = false;
             }
 
             @Override
@@ -177,15 +179,6 @@ public class StackButtonWidget extends FrameLayout implements View.OnClickListen
 
             }
         });
-    }
-
-    private void setItemsListener() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View itemView = getChildAt(i);
-            if (itemView.getId() != R.id.stack) {
-                itemView.setOnClickListener(mItemClickListener);
-            }
-        }
     }
 
     private RotateAnimation getRotateAnimation(boolean stackOn) {
