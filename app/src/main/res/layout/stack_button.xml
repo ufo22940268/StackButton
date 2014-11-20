@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<com.bettycc.stackbutton.library.StackButton
+<com.bettycc.stackbutton.library.StackButtonWidget
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
@@ -26,10 +26,24 @@
         />
 
     <ImageView
+        android:id="@+id/handwriting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_handwriting"
+        />
+
+    <ImageView
+        android:id="@+id/audio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_audio"
+        />
+
+    <ImageView
         android:id="@id/stack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_compose"
         />
 
-</com.bettycc.stackbutton.library.StackButton>
+</com.bettycc.stackbutton.library.StackButtonWidget>

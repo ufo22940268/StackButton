@@ -1,250 +1,48 @@
 package com.bettycc.stackbutton.library;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.os.Build;
-import android.util.AttributeSet;
+import android.app.Activity;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.OvershootInterpolator;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
-import android.widget.FrameLayout;
+import android.widget.PopupWindow;
 
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorSet;
-import com.nineoldandroids.animation.ObjectAnimator;
+/**
+ * Created by ccheng on 11/19/14.
+ */
+public class StackButton {
 
-import java.util.ArrayList;
-import java.util.List;
+    private final float mPadding;
+    private Activity mActivity;
+    private int mLayout;
+    private PopupWindow mPopupWindow;
+    private final StackButtonWidget mContainer;
+    private View.OnClickListener mItemClickListener;
 
-
-public class StackButton extends FrameLayout implements View.OnClickListener {
-
-    private View mStackView;
-    private boolean stackOn;
-    private List<View> mItemViews = new ArrayList<View>();
-    private float mViewSize;
-    private OnClickListener mItemClickListener;
-
-    public StackButton(Context context) {
-        super(context);
-        init(null, 0);
+    public StackButton(Activity activity, int layout) {
+        mActivity = activity;
+        mLayout = layout;
+        mPadding = mActivity.getResources().getDimension(R.dimen.stack_button_padding);
+        mContainer = (StackButtonWidget) LayoutInflater.from(mActivity).inflate(mLayout, null);
     }
 
-    public StackButton(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs, 0);
-    }
-
-    public StackButton(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(attrs, defStyle);
-    }
-
-    private void init(AttributeSet attrs, int defStyle) {
-        mViewSize = getResources().getDimension(R.dimen.item_size);
-    }
-
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mStackView = findViewById(R.id.stack);
-        mStackView.setOnClickListener(this);
-
-        for (int i = 0; i < getChildCount(); i++) {
-            View view = getChildAt(i);
-            if (view.getId() != R.id.stack) {
-                view.setVisibility(View.GONE);
-                mItemViews.add(view);
-            }
-
-            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-        int i = view.getId();
-        if (i == R.id.stack) {
-            toggle();
-        }
-    }
-
-    public void toggle() {
-        RotateAnimation rotateAnimation = getRotateAnimation(isStackOn());
-        mStackView.startAnimation(rotateAnimation);
-
-        setStackOn(isStackOn() ? false : true);
-
-        if (isStackOn()) {
-            showStack();
-        } else {
-            hideStack();
-        }
-    }
-
-    private void hideStack() {
-
-        if (mItemViews.size() == 0) {
-            return;
-        }
-
-        View view = mItemViews.get(0);
-        for (int i = 0; i < mItemViews.size(); i++) {
-            View itemView = mItemViews.get(i);
-            hideItemAnim(itemView, i);
-        }
-    }
-
-    private void hideItemAnim(final View view, int i) {
-        ObjectAnimator translateY = ObjectAnimator.ofFloat(view, "translationY",  -mViewSize * (i + 1), 0);
-        translateY.setInterpolator(new OvershootInterpolator());
-        translateY.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(view, "alpha", 1, 0);
-        alpha.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.play(translateY).with(alpha);
-        animatorSet.start();
-        animatorSet.addListener(new Animator.AnimatorListener() {
+    public void show() {
+        int height = (int) (mActivity.getResources().getDimension(R.dimen.item_size) * (mContainer.getChildCount() + 1));
+        mPopupWindow = new PopupWindow(mContainer,
+                (int) mActivity.getResources().getDimension(R.dimen.item_size), height);
+        mContainer.post(new Runnable() {
             @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                view.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
+            public void run() {
+                mPopupWindow.showAtLocation(mActivity.getWindow().getDecorView(),
+                        Gravity.RIGHT | Gravity.BOTTOM, (int) mPadding, (int) mPadding);
             }
         });
     }
 
-    private void showStack() {
-        if (mItemViews.size() == 0) {
-            return;
-        }
-
-        View view = mItemViews.get(0);
-        for (int i = 0; i < mItemViews.size(); i++) {
-            View itemView = mItemViews.get(i);
-            showItemAnim(itemView, i);
-        }
+    public void hide() {
+        mPopupWindow.dismiss();
     }
 
-    private void showItemAnim(final View view, int i) {
-        view.setVisibility(VISIBLE);
-
-        ObjectAnimator translateY = ObjectAnimator.ofFloat(view, "translationY", 0,  -mViewSize * (i + 1) );
-        translateY.setInterpolator(new OvershootInterpolator());
-        translateY.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(view, "alpha", 0, 1);
-        alpha.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.play(translateY).with(alpha);
-        animatorSet.start();
-
-        animatorSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                setItemsListener();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-//        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
-//        alphaAnimation.setFillAfter(true);
-//        alphaAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-//
-//        AnimationSet animationSet = new AnimationSet(false);
-//        animationSet.setFillAfter(true);
-//        animationSet.addAnimation(alphaAnimation);
-//
-//        ObjectAnimator translateY = ObjectAnimator.ofFloat(view, "translationY", 0, -mViewSize * (i + 1));
-//        translateY.setInterpolator(new OvershootInterpolator());
-//        translateY.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-
-//        animationSet.setAnimationListener(new Animation.AnimationListener() {
-//            @Override
-//            public void onAnimationStart(Animation animation) {
-//
-//            }
-//
-//            @Override
-//            public void onAnimationEnd(Animation animation) {
-//                setItemsListener();
-//            }
-//
-//            @Override
-//            public void onAnimationRepeat(Animation animation) {
-//
-//            }
-//        });
-//        view.startAnimation(animationSet);
-//        translateY.start();
-    }
-
-    private void setItemsListener() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View itemView = getChildAt(i);
-            if (itemView.getId() != R.id.stack) {
-                itemView.setOnClickListener(mItemClickListener);
-            }
-        }
-    }
-
-    private RotateAnimation getRotateAnimation(boolean stackOn) {
-        int fromDegrees = stackOn ? 125 : 0;
-        int toDegrees = stackOn ? 0 : 125;
-        RotateAnimation rotateAnimation = new RotateAnimation(fromDegrees, toDegrees, mStackView.getWidth() / 2, mStackView.getHeight() / 2);
-        rotateAnimation.setFillAfter(true);
-        rotateAnimation.setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
-        rotateAnimation.setInterpolator(new OvershootInterpolator());
-        return rotateAnimation;
-    }
-
-    public boolean isStackOn() {
-        return stackOn;
-    }
-
-    public void setStackOn(boolean stackOn) {
-        this.stackOn = stackOn;
-    }
-
-    public void setItemClickListener(OnClickListener itemClickListener) {
-        mItemClickListener = itemClickListener;
+    public void setItemClickListener(View.OnClickListener itemClickListener) {
+        mContainer.setItemClickListener(itemClickListener);
     }
 }
